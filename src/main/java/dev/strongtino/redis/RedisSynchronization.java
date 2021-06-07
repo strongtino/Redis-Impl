@@ -6,7 +6,7 @@ import redis.clients.jedis.JedisPubSub;
 @RequiredArgsConstructor
 public class RedisSynchronization extends JedisPubSub {
 
-    private final RedisService redisService;
+    private final RedisService service;
 
     @Override
     public void onMessage(String channel, String channelMessage) {
@@ -17,6 +17,6 @@ public class RedisSynchronization extends JedisPubSub {
 
         if (type == null) return;
 
-        redisService.getSubscribers().forEach(hook -> hook.execute(type, new RedisJsonObject(args[1])));
+        service.getSubscribers().forEach(subscriber -> subscriber.execute(type, new RedisJsonObject(args[1])));
     }
 }

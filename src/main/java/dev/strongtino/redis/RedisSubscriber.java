@@ -15,7 +15,6 @@ public class RedisSubscriber {
     }
 
     public interface Executor {
-
         void run(RedisJsonObject object);
     }
 }
