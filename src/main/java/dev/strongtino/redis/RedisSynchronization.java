@@ -3,6 +3,8 @@ package dev.strongtino.redis;
 import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 public class RedisSynchronization extends JedisPubSub {
 
@@ -13,7 +15,10 @@ public class RedisSynchronization extends JedisPubSub {
         if (!channel.equals(RedisService.CHANNEL)) return;
 
         String[] args = channelMessage.split(RedisService.SPLIT_CHAR);
-        RedisType type = RedisType.get(args[0]);
+        RedisType type = Arrays.stream(RedisType.values())
+                .filter(redisType -> redisType.name().equals(args[0]))
+                .findFirst()
+                .orElse(null);
 
         if (type == null) return;
 
