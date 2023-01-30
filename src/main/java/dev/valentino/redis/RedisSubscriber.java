@@ -1,20 +1,17 @@
 package dev.valentino.redis;
 
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class RedisSubscriber {
+public class RedisSubscriber<T> {
 
-    private final RedisMessage type;
-    private final Executor executor;
+    private final Class<T> clazz;
+    private final TypeCallback<T> callback;
 
-    void execute(RedisMessage type, RedisJsonObject object) {
-        if (this.type == type) {
-            executor.run(object);
+    public void execute(JsonObject object) {
+        if (callback != null) {
+            callback.run(GsonUtil.fromJsonObject(object, clazz));
         }
-    }
-
-    public interface Executor {
-        void run(RedisJsonObject object);
     }
 }
