@@ -1,8 +1,8 @@
-# Redis-Impl
-Simplified redis publish-subscribe implementation that allows you to easily subscribe to and publish various messages across multiple applications.
+package dev.valentino.redis;
 
-### Implementation Example
-```java
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 public class Example {
 
     public static void main(String[] args) {
@@ -26,4 +26,3 @@ public class Example {
         private final String message;
     }
 }
-```
