@@ -1,4 +1,4 @@
-package dev.strongtino.redis;
+package dev.valentino.redis;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

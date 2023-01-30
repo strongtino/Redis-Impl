@@ -1,4 +1,4 @@
-package dev.strongtino.redis;
+package dev.valentino.redis;
 
 import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.JedisPubSub;
@@ -6,7 +6,7 @@ import redis.clients.jedis.JedisPubSub;
 import java.util.Arrays;
 
 @RequiredArgsConstructor
-public class RedisSynchronization extends JedisPubSub {
+public class RedisPubSub extends JedisPubSub {
 
     private final RedisService service;
 
@@ -15,13 +15,9 @@ public class RedisSynchronization extends JedisPubSub {
         if (!channel.equals(RedisService.CHANNEL)) return;
 
         String[] args = channelMessage.split(RedisService.SPLIT_CHAR);
-        RedisType type = Arrays.stream(RedisType.values())
-                .filter(redisType -> redisType.name().equals(args[0]))
+        Arrays.stream(RedisMessage.values())
+                .filter(redisMessage -> redisMessage.name().equals(args[0]))
                 .findFirst()
-                .orElse(null);
-
-        if (type == null) return;
-
-        service.getSubscribers().forEach(subscriber -> subscriber.execute(type, new RedisJsonObject(args[1])));
+                .ifPresent(message -> service.getSubscribers().forEach(subscriber -> subscriber.execute(message, new RedisJsonObject(args[1]))));
     }
 }
