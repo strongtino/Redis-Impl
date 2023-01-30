@@ -1,26 +1,23 @@
 package dev.valentino.redis;
 
-import com.google.gson.JsonObject;
+import lombok.AccessLevel;
 import lombok.Getter;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
-@Getter
+@Getter(AccessLevel.PACKAGE)
 public class RedisService {
 
+    @Getter(AccessLevel.NONE)
     private final JedisPool subscriberPool, publisherPool;
+    private final Map<String, RedisSubscriber<?>> subscribers = new HashMap<>();
 
-    final List<RedisSubscriber> subscribers = new ArrayList<>();
-
-    static final String SPLIT_CHAR = ";";
-    static final String CHANNEL = "channel";
+    private final String channel = "channel";
+    private final String splitChar = ";";
 
     public RedisService(String address, int port) {
         subscriberPool = new JedisPool(address, port);
@@ -28,21 +25,21 @@ public class RedisService {
 
         Executors.newSingleThreadExecutor().execute(() -> {
             try (Jedis jedis = subscriberPool.getResource()) {
-                jedis.subscribe(new RedisPubSub(this), CHANNEL);
+                jedis.subscribe(new RedisPubSub(this), channel);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
 
-    public void subscribe(RedisMessage type, RedisSubscriber.Executor executor) {
-        subscribers.add(new RedisSubscriber(type, executor));
+    public <T> void subscribe(RedisMessage message, Class<T> clazz, TypeCallback<T> callback) {
+        subscribers.put(message.name(), new RedisSubscriber<>(clazz, callback));
     }
 
-    public void publish(RedisMessage type, JsonObject object) {
+    public void publish(RedisMessage type, Object object) {
         try (Jedis jedis = publisherPool.getResource()) {
             try {
-                jedis.publish(CHANNEL, type.name() + SPLIT_CHAR + object.toString());
+                jedis.publish(channel, type.name() + splitChar + GsonUtil.toJson(object));
             } catch (Exception e) {
                 e.printStackTrace();
             }
